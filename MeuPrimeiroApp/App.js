@@ -9,62 +9,110 @@ class App extends Component{
     this.state = {
       numero1: '',
       numero2: '',
-      numerofloat: false,
-      resultado: 0,
-      operacao1: ''
+      resultado: '',
+      operacao1: '',
 
     };
     this.addNumero = this.addNumero.bind(this);
     this.op = this.op.bind(this);
+    this.limpar = this.limpar.bind(this);
   }
 
+  limpar(){
+    this.setState({
+      operacao1: '',
+      numero1: '',
+      numero2: '',
+      resultado: ''
+    })
+  }
   op(operacao){
-    
-    if(operacao === '='){
+    var aux = false
+    if(this.state.operacao1 != '' && operacao != '=' && this.state.numero2 != ''){
+      aux = true
+    }
+    if(operacao === '=' || this.state.numero2 != '' ){
+
       if(this.state.operacao1 === '+'){
         this.setState({
-          resultado: Number(this.state.numero1) + Number(this.state.numero2)
+          resultado: Number(this.state.numero1.replace(",",".")) + Number(this.state.numero2.replace(",","."))
         })
       }else if(this.state.operacao1 === '-'){
         this.setState({
-          resultado: Number(this.state.numero1) - Number(this.state.numero2)
+          resultado: Number(this.state.numero1.replace(",",".")) - Number(this.state.numero2.replace(",","."))
         })
       }else if(this.state.operacao1 === '*'){
         this.setState({
           
-          resultado: Number(this.state.numero1) * Number(this.state.numero2)
+          resultado: Number(this.state.numero1.replace(",",".")) * Number(this.state.numero2.replace(",","."))
         })
       }else if(this.state.operacao1 === '/'){
         this.setState({
-          resultado: Number(this.state.numero1) / Number(this.state.numero2)
+          resultado: Number(this.state.numero1.replace(",",".")) / Number(this.state.numero2.replace(",","."))
         })
       }else{
         this.setState({
           resultado: 'ERROR'
         })
       }
-      this.setState({
-        operacao1: '',
-        numerofloat: false,
-        numero1: '',
-        numero2: '',
-      })
       
-    
+        this.setState({
+          operacao1: '',
+          numero1: '',
+          numero2: '',
+        })
     }else{
       this.setState({
-        operacao1: operacao,
+        operacao1: operacao,  
+      })
+      if(this.state.numero1 === '' && this.state.resultado != 0 ){
+        this.setState({
+        numero1: this.state.resultado.toString(),
+        resultado: ''
+      })
+      }
+    }
+    if (aux){
+      if(this.state.operacao1 === '+'){
+        this.setState({
+          numero1: (Number(this.state.numero1.replace(",",".")) + Number(this.state.numero2.replace(",","."))).toString()
+        })
+      }else if(this.state.operacao1 === '-'){
+        this.setState({
+          numero1: (Number(this.state.numero1.replace(",",".")) - Number(this.state.numero2.replace(",","."))).toString()
+        })
+      }else if(this.state.operacao1 === '*'){
+        this.setState({
+          
+          numero1: (Number(this.state.numero1.replace(",",".")) * Number(this.state.numero2.replace(",","."))).toString()
+        })
+      }else if(this.state.operacao1 === '/'){
+        this.setState({
+          numero1: (Number(this.state.numero1.replace(",",".")) / Number(this.state.numero2.replace(",","."))).toString()
+        })
+      }else{
+        this.setState({
+          numero1: 'ERROR'
+        })
+      }
+      this.setState({
+        resultado: '',
+        numero2: '',
+        operacao1: operacao, 
       })
     }
   }
   addNumero(valor){
-    if (valor === ','){
-      this.setState({
-        numerofloat: true,
-      })
+    this.setState({
+      resultado: ''
+    })
+    if( valor === ','){
+      if(this.state.numero1 === '0' || this.state.numero2 === '0'){
+        valor = '0,'
+      }
     }
     if (this.state.operacao1 != ''){
-      if(this.state.numero2 === ''){
+      if(this.state.numero2 === '' || this.state.numero2 === '0'){
         this.setState({
           numero2: valor,
         })
@@ -75,7 +123,7 @@ class App extends Component{
         })
       }
     }else{
-      if(this.state.numero1 === ''){
+      if(this.state.numero1 === '' || this.state.numero1 === '0'){
         this.setState({
           numero1: valor,
         })
@@ -94,10 +142,15 @@ class App extends Component{
     return (
       <View style={styles.container}>
         <View style={styles.area}>
-        <Text style={styles.textovisor}>{this.state.numero1} {this.state.operacao1} {this.state.numero2}</Text>
-          <Text style={styles.textovisor}>{this.state.resultado}</Text>
+          <Text style={styles.textovisor}>{this.state.numero1.toString().replace(".",",")} {this.state.operacao1} {this.state.numero2.toString().replace(".",",")}</Text>
+          <Text style={styles.textovisor}>{this.state.resultado.toString().replace(".",",")}</Text>
         </View>
-          <View style={styles.teclado}>
+        <View style={styles.teclado}>
+          <View style={styles.areaNumerica1}>
+            <TouchableOpacity style={styles.botaozera} onPress={ () => this.limpar()}> 
+              <Text style={styles.textoOp}>CE</Text> 
+            </TouchableOpacity>
+          </View>
           <View style={styles.areaNumerica1}>
             <TouchableOpacity style={styles.botaoNumero} onPress={ () => this.addNumero('1')}> 
               <Text style={styles.texto}>1</Text> 
@@ -166,17 +219,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    justifyContent: 'flex-end',
-    
+    justifyContent: 'center',  
   },
   area:{
-    marginStart: 6,
-    marginBottom: 100,
+    flex: 1,
+    marginBottom: 20,
     paddingEnd: 10,
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
     backgroundColor: 'silver',
-    marginTop: 30,
+    marginTop: 100,
     alignItems: 'flex-end',
     width: 400,
     height: 100,
@@ -186,12 +236,22 @@ const styles = StyleSheet.create({
   },
   areaNumerica1:{
     flexDirection: 'row',
-    
-    
+    justifyContent:'space-between',
+    alignItems: 'center' 
   },
   botaoNumero:{
-    height: 80,
-    width: 80,
+    flex: 1, 
+    backgroundColor: 'dimgray',
+    margin: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 15,
+    borderColor: 'black',
+    borderWidth: 3,
+  },
+  botaozera:{
+    
+    flex: 1,
     backgroundColor: 'dimgray',
     margin: 10,
     alignItems: 'center',
@@ -207,13 +267,12 @@ const styles = StyleSheet.create({
 
   },
   teclado:{
-    alignItems: 'flex-start',
-    justifyContent: 'flex-end',
-      
+    flex: 3,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',   
   },
   botaoOperacao:{
-    height: 80,
-    width: 80,
+    flex: 1,
     backgroundColor: 'tomato',
     margin: 10,
     alignItems: 'center',
